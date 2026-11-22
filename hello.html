@@ -70,6 +70,37 @@
   @keyframes drift-a { to { transform: translate(-8vmax, 6vmax) scale(1.08); } }
   @keyframes drift-b { to { transform: translate(7vmax, -5vmax) scale(1.12); } }
 
+  /* Small hearts drifting up behind the page */
+  .hearts {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .heart {
+    position: absolute;
+    bottom: -2rem;
+    left: var(--x);
+    font-size: var(--size);
+    line-height: 1;
+    color: var(--accent);
+    opacity: var(--o);
+    animation: heart-float var(--dur) linear infinite;
+    animation-delay: var(--delay);
+  }
+  .heart > span {
+    display: inline-block;
+    animation: heart-sway var(--sway) ease-in-out infinite alternate;
+  }
+  @keyframes heart-float {
+    to { transform: translateY(calc(-100vh - 4rem)); }
+  }
+  @keyframes heart-sway {
+    from { transform: translateX(-0.6em) rotate(-14deg); }
+    to { transform: translateX(0.6em) rotate(14deg); }
+  }
+
   /* Film grain */
   body::after {
     content: "";
@@ -322,12 +353,14 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .bloom, .word span { animation: none; }
+    .bloom, .word span, .heart, .heart > span { animation: none; }
+    .heart { bottom: auto; top: var(--y); }
   }
 </style>
 
 <div class="bloom one" aria-hidden="true"></div>
 <div class="bloom two" aria-hidden="true"></div>
+<div class="hearts" id="hearts" aria-hidden="true"></div>
 
 <div class="page">
   <header>
@@ -391,6 +424,26 @@
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") input.blur(); });
   window.addEventListener("resize", fit);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+
+  // Small hearts: spread across the width, already mid-flight on load (negative delays).
+  const heartsEl = document.getElementById("hearts");
+  const rand = (min, max) => min + Math.random() * (max - min);
+  for (let i = 0; i < 16; i++) {
+    const h = document.createElement("span");
+    h.className = "heart";
+    const dur = rand(16, 30);
+    h.style.setProperty("--x", (i / 16) * 100 + rand(0, 6) + "%");
+    h.style.setProperty("--y", rand(5, 95) + "%");
+    h.style.setProperty("--size", rand(10, 20).toFixed(1) + "px");
+    h.style.setProperty("--o", rand(0.25, 0.55).toFixed(2));
+    h.style.setProperty("--dur", dur.toFixed(1) + "s");
+    h.style.setProperty("--delay", (-rand(0, dur)).toFixed(1) + "s");
+    h.style.setProperty("--sway", rand(3, 6).toFixed(1) + "s");
+    const glyph = document.createElement("span");
+    glyph.textContent = "♥";
+    h.append(glyph);
+    heartsEl.append(h);
+  }
 
   // Dark mode switch: follows the device until the visitor picks, then remembers the pick.
   const THEME_KEY = "hello-theme";

@@ -1,0 +1,192 @@
+<title>Hello</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+  /* Layout: one column, a large personal greeting, a name field, a quiet row of hellos beneath */
+  :root {
+    --bg: #fdf1f4;
+    --surface: #ffffff;
+    --fg: #2b1626;
+    --muted: #7a5a6c;
+    --accent: #c2255c;
+    --line: #efd2db;
+    --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1118; --surface: #28171f; --fg: #f6e8ee; --muted: #c09aab;
+      --accent: #f06595; --line: #3d2530; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1118; --surface: #28171f; --fg: #f6e8ee; --muted: #c09aab;
+    --accent: #f06595; --line: #3d2530; color-scheme: dark;
+  }
+
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    display: grid;
+    place-items: center;
+    padding-block: 3rem;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
+  }
+  main {
+    width: 100%;
+    max-width: 36rem;
+    display: grid;
+    gap: 1.5rem;
+  }
+  .eyebrow {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.75rem, 11vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  h1 .name, h1 .dot { color: var(--accent); }
+  .lede {
+    margin: 0;
+    color: var(--muted);
+    max-width: 32rem;
+  }
+  form {
+    display: grid;
+    gap: 0.4rem;
+    max-width: 22rem;
+  }
+  label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  input {
+    font: inherit;
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.8rem;
+    min-width: 0;
+  }
+  input::placeholder { color: var(--muted); opacity: 0.7; }
+  input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-color: var(--accent);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  li {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.95rem;
+  }
+  li small {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  time { font-variant-numeric: tabular-nums; }
+</style>
+
+<main>
+  <p class="eyebrow" id="when">Good day · <time id="clock">--:--</time></p>
+  <h1 id="greeting">Hello<span class="dot">.</span></h1>
+  <form id="name-form" autocomplete="off">
+    <label for="name">Your name</label>
+    <input id="name" name="name" type="text" maxlength="40" placeholder="Type your name">
+  </form>
+  <p class="lede">Your name stays in this browser, so the page greets you next time too. Here's hello in a few other languages.</p>
+  <ul>
+    <li>Hola <small>es</small></li>
+    <li>Bonjour <small>fr</small></li>
+    <li>Namaste <small>hi</small></li>
+    <li>Hallo <small>de</small></li>
+    <li>Ciao <small>it</small></li>
+    <li>Konnichiwa <small>ja</small></li>
+    <li>Olá <small>pt</small></li>
+  </ul>
+</main>
+
+<script>
+  const KEY = "hello-name";
+  const greeting = document.getElementById("greeting");
+  const input = document.getElementById("name");
+
+  function render(name) {
+    greeting.textContent = "";
+    greeting.append("Hello");
+    const clean = name.trim();
+    if (clean) {
+      greeting.append(", ");
+      const span = document.createElement("span");
+      span.className = "name";
+      span.textContent = clean;
+      greeting.append(span);
+    }
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dot.textContent = clean ? "" : ".";
+    if (clean) greeting.append(".");
+    else greeting.append(dot);
+  }
+
+  let saved = "";
+  try { saved = localStorage.getItem(KEY) || ""; } catch (e) {}
+  if (!input.value) input.value = saved;
+  render(input.value);
+
+  input.addEventListener("input", () => {
+    render(input.value);
+    try { localStorage.setItem(KEY, input.value.trim()); } catch (e) {}
+  });
+  document.getElementById("name-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    input.blur();
+  });
+
+  function tick() {
+    const now = new Date();
+    const h = now.getHours();
+    const part = h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    document.getElementById("when").innerHTML = part + ' · <time id="clock">' + time + "</time>";
+  }
+  tick();
+  setInterval(tick, 30000);
+</script>

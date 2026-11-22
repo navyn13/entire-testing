@@ -429,11 +429,11 @@
   // Small hearts: spread across the width, already mid-flight on load (negative delays).
   const heartsEl = document.getElementById("hearts");
   const rand = (min, max) => min + Math.random() * (max - min);
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 20; i++) {
     const h = document.createElement("span");
     h.className = "heart";
     const dur = rand(16, 30);
-    h.style.setProperty("--x", (i / 16) * 100 + rand(0, 6) + "%");
+    h.style.setProperty("--x", (i / 20) * 100 + rand(0, 6) + "%");
     h.style.setProperty("--y", rand(5, 95) + "%");
     h.style.setProperty("--size", rand(10, 20).toFixed(1) + "px");
     h.style.setProperty("--o", rand(0.25, 0.55).toFixed(2));

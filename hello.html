@@ -229,6 +229,28 @@
     gap: 1rem 2.25rem;
   }
   footer li { display: grid; gap: 0.1rem; }
+  footer button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 0.2rem 0;
+    margin: 0;
+    display: grid;
+    gap: 0.1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  footer button:hover span,
+  footer button[aria-pressed="true"] span { color: var(--accent); }
+  footer button[aria-pressed="true"] { border-bottom-color: var(--accent); }
+  footer button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
   footer li span {
     font-family: var(--display);
     font-weight: 700;
@@ -267,22 +289,22 @@
       <span class="word" aria-label="Hello"><span style="--i:0" aria-hidden="true">H</span><span style="--i:1" aria-hidden="true">e</span><span style="--i:2" aria-hidden="true">l</span><span style="--i:3" aria-hidden="true">l</span><span style="--i:4" aria-hidden="true">o</span></span><span class="comma">,</span>
       <span class="field"><label class="sr-only" for="name">Your name</label><input id="name" name="name" type="text" maxlength="24" placeholder="you" autocomplete="given-name" spellcheck="false"><span class="mirror" id="mirror" aria-hidden="true"></span></span><span class="dot">.</span>
     </h1>
-    <p class="hint"><label for="name">Tap the name to make it yours.</label> It's saved in this browser only, so the page remembers you next time.</p>
+    <p class="hint"><label for="name">Tap the name to make it yours.</label> Tap a greeting below to say hello another way. Your name is saved in this browser only.</p>
   </main>
 
   <footer>
     <h2>Ten other ways to say it</h2>
     <ul>
-      <li lang="es"><span>Hola</span><small>Spanish</small></li>
-      <li lang="fr"><span>Bonjour</span><small>French</small></li>
-      <li lang="hi"><span>नमस्ते</span><small>Hindi</small></li>
-      <li lang="de"><span>Hallo</span><small>German</small></li>
-      <li lang="it"><span>Ciao</span><small>Italian</small></li>
-      <li lang="ja"><span>こんにちは</span><small>Japanese</small></li>
-      <li lang="pt"><span>Olá</span><small>Portuguese</small></li>
-      <li lang="ko"><span>안녕하세요</span><small>Korean</small></li>
-      <li lang="sw"><span>Jambo</span><small>Swahili</small></li>
-      <li lang="tr"><span>Merhaba</span><small>Turkish</small></li>
+      <li><button type="button" lang="es" aria-pressed="false"><span>Hola</span><small>Spanish</small></button></li>
+      <li><button type="button" lang="fr" aria-pressed="false"><span>Bonjour</span><small>French</small></button></li>
+      <li><button type="button" lang="hi" aria-pressed="false"><span>नमस्ते</span><small>Hindi</small></button></li>
+      <li><button type="button" lang="de" aria-pressed="false"><span>Hallo</span><small>German</small></button></li>
+      <li><button type="button" lang="it" aria-pressed="false"><span>Ciao</span><small>Italian</small></button></li>
+      <li><button type="button" lang="ja" aria-pressed="false"><span>こんにちは</span><small>Japanese</small></button></li>
+      <li><button type="button" lang="pt" aria-pressed="false"><span>Olá</span><small>Portuguese</small></button></li>
+      <li><button type="button" lang="ko" aria-pressed="false"><span>안녕하세요</span><small>Korean</small></button></li>
+      <li><button type="button" lang="sw" aria-pressed="false"><span>Jambo</span><small>Swahili</small></button></li>
+      <li><button type="button" lang="tr" aria-pressed="false"><span>Merhaba</span><small>Turkish</small></button></li>
     </ul>
   </footer>
 </div>
@@ -312,6 +334,38 @@
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") input.blur(); });
   window.addEventListener("resize", fit);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+
+  // Tap a greeting to swap the headline word; tap it again to go back to "Hello".
+  const wordEl = document.querySelector(".word");
+  const langButtons = Array.from(document.querySelectorAll("footer button"));
+
+  function setWord(text, lang) {
+    wordEl.setAttribute("aria-label", text);
+    wordEl.lang = lang;
+    const parts = window.Intl && Intl.Segmenter
+      ? Array.from(new Intl.Segmenter(lang, { granularity: "grapheme" }).segment(text), (s) => s.segment)
+      : [text];
+    wordEl.replaceChildren(...parts.map((ch, i) => {
+      const s = document.createElement("span");
+      s.textContent = ch;
+      s.style.setProperty("--i", i);
+      s.setAttribute("aria-hidden", "true");
+      return s;
+    }));
+  }
+
+  langButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const turningOn = btn.getAttribute("aria-pressed") !== "true";
+      langButtons.forEach((b) => b.setAttribute("aria-pressed", "false"));
+      if (turningOn) {
+        btn.setAttribute("aria-pressed", "true");
+        setWord(btn.querySelector("span").textContent, btn.lang);
+      } else {
+        setWord("Hello", "en");
+      }
+    });
+  });
 
   const partEl = document.getElementById("part");
   const clockEl = document.getElementById("clock");

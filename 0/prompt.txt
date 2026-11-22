@@ -1,0 +1,1 @@
+i am configuring entire cli but i change code so it only displays to push in github not in entire dashboard how to do it

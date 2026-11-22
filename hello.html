@@ -2,190 +2,324 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap">
 <style>
-  /* Layout: one column, a large personal greeting, a name field, a quiet row of hellos beneath */
+  /* Layout: one screen in three bands — a quiet top line (greeting + clock), a huge headline
+     with the name typed straight into it, and a flowing row of hellos from elsewhere.
+     Two soft blooms of rose and apricot drift behind everything. */
   :root {
-    --bg: #fdf1f4;
-    --surface: #ffffff;
-    --fg: #2b1626;
-    --muted: #7a5a6c;
+    --bg: #fbeef1;
+    --surface: #fff7f9;
+    --fg: #2a1424;
+    --muted: #7f5e70;
     --accent: #c2255c;
-    --line: #efd2db;
-    --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
-    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --glow: #f39a5b;
+    --line: #e9c8d3;
+    --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --grain-blend: multiply;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #1c1118; --surface: #28171f; --fg: #f6e8ee; --muted: #c09aab;
-      --accent: #f06595; --line: #3d2530; color-scheme: dark;
+      --bg: #160c12; --surface: #21121a; --fg: #f8e8ee; --muted: #b893a5;
+      --accent: #ff6b9d; --glow: #d9733a; --line: #3b2330;
+      --grain-blend: screen; color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #1c1118; --surface: #28171f; --fg: #f6e8ee; --muted: #c09aab;
-    --accent: #f06595; --line: #3d2530; color-scheme: dark;
+    --bg: #160c12; --surface: #21121a; --fg: #f8e8ee; --muted: #b893a5;
+    --accent: #ff6b9d; --glow: #d9733a; --line: #3b2330;
+    --grain-blend: screen; color-scheme: dark;
   }
 
   html, body { height: 100%; }
+  *, *::before, *::after { box-sizing: border-box; }
+
   body {
     background: var(--bg);
     color: var(--fg);
     font-family: var(--body);
     font-size: 16px;
     line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* Ambient blooms */
+  .bloom {
+    position: fixed;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+  }
+  .bloom.one {
+    width: 60vmax; height: 60vmax;
+    top: -22vmax; right: -18vmax;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 38%, transparent), transparent 65%);
+    animation: drift-a 38s ease-in-out infinite alternate;
+  }
+  .bloom.two {
+    width: 52vmax; height: 52vmax;
+    bottom: -24vmax; left: -16vmax;
+    background: radial-gradient(circle, color-mix(in srgb, var(--glow) 34%, transparent), transparent 65%);
+    animation: drift-b 46s ease-in-out infinite alternate;
+  }
+  @keyframes drift-a { to { transform: translate(-8vmax, 6vmax) scale(1.08); } }
+  @keyframes drift-b { to { transform: translate(7vmax, -5vmax) scale(1.12); } }
+
+  /* Film grain */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.07;
+    mix-blend-mode: var(--grain-blend);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .page {
+    min-height: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
     display: grid;
-    place-items: center;
-    padding-block: 3rem;
+    grid-template-rows: auto 1fr auto;
+    gap: 3rem;
+    padding-block: clamp(1.5rem, 4vw, 3rem);
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
-    box-sizing: border-box;
   }
-  main {
-    width: 100%;
-    max-width: 36rem;
-    display: grid;
-    gap: 1.5rem;
+  @media (min-width: 640px) {
+    .page {
+      padding-left: max(clamp(16px, 6vw, 4rem), env(safe-area-inset-left, 0px));
+      padding-right: max(clamp(16px, 6vw, 4rem), env(safe-area-inset-right, 0px));
+    }
   }
-  .eyebrow {
-    margin: 0;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
+
+  /* Top line */
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
+  }
+  header .part { display: inline-flex; align-items: center; gap: 0.6rem; }
+  header .part::before {
+    content: "";
+    width: 0.5rem; height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  header time {
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Hero */
+  .hero {
+    align-self: center;
+    display: grid;
+    gap: 1.75rem;
+    min-width: 0;
   }
   h1 {
     margin: 0;
     font-family: var(--display);
-    font-weight: 700;
-    font-size: clamp(2.75rem, 11vw, 5rem);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
-    overflow-wrap: anywhere;
+    font-variation-settings: "opsz" 96;
+    font-weight: 800;
+    font-size: clamp(3.4rem, 14vw, 9.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+    min-width: 0;
   }
-  h1 .name, h1 .dot { color: var(--accent); }
-  .lede {
+  .word { display: inline-block; white-space: nowrap; }
+  .word span {
+    display: inline-block;
+    animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  @keyframes rise {
+    from { transform: translateY(0.18em) rotate(-4deg); }
+    to { transform: none; }
+  }
+  .comma { color: var(--fg); }
+
+  .field {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: baseline;
+  }
+  .field input {
+    font: inherit;
+    letter-spacing: inherit;
+    font-variation-settings: inherit;
+    color: var(--accent);
+    background: transparent;
+    border: 0;
+    padding: 0 0.04em;
     margin: 0;
+    width: 3ch;
+    max-width: 100%;
+    line-height: 1.05;
+    border-bottom: 0.06em dashed color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: 0;
+    transition: border-color 0.2s;
+  }
+  .field input::placeholder {
+    color: color-mix(in srgb, var(--accent) 38%, transparent);
+    font-weight: 400;
+    font-style: italic;
+  }
+  .field input:hover { border-bottom-color: var(--accent); }
+  .field input:focus { outline: none; border-bottom-style: solid; border-bottom-color: var(--accent); }
+  .field input:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 0.08em; border-radius: 0.08em; }
+  .field input.filled { border-bottom-color: transparent; }
+  .field input.filled:hover, .field input.filled:focus { border-bottom-color: var(--accent); }
+  .mirror {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    top: 0; left: 0;
+    padding: 0 0.04em;
+  }
+  .mirror.ph { font-weight: 400; font-style: italic; }
+  .dot { color: var(--fg); }
+
+  .hint {
+    margin: 0;
+    max-width: 30rem;
     color: var(--muted);
-    max-width: 32rem;
+    font-size: 1rem;
   }
-  form {
+  .hint label { color: var(--fg); font-weight: 500; cursor: pointer; }
+
+  /* Elsewhere */
+  footer {
     display: grid;
-    gap: 0.4rem;
-    max-width: 22rem;
+    gap: 1rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
   }
-  label {
-    font-size: 0.8rem;
+  footer h2 {
+    margin: 0;
+    font-size: 0.78rem;
     font-weight: 500;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
   }
-  input {
-    font: inherit;
-    color: var(--fg);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 0.5rem;
-    padding: 0.6rem 0.8rem;
-    min-width: 0;
-  }
-  input::placeholder { color: var(--muted); opacity: 0.7; }
-  input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-color: var(--accent);
-  }
-  ul {
+  footer ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 1rem 2.25rem;
   }
-  li {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    padding: 0.35rem 0.75rem;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    font-size: 0.95rem;
+  footer li { display: grid; gap: 0.1rem; }
+  footer li span {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.25rem, 3vw, 1.6rem);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
-  li small {
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  footer li small {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
     color: var(--muted);
   }
-  time { font-variant-numeric: tabular-nums; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bloom, .word span { animation: none; }
+  }
 </style>
 
-<main>
-  <p class="eyebrow" id="when">Good day · <time id="clock">--:--</time></p>
-  <h1 id="greeting">Hello<span class="dot">.</span></h1>
-  <form id="name-form" autocomplete="off">
-    <label for="name">Your name</label>
-    <input id="name" name="name" type="text" maxlength="40" placeholder="Type your name">
-  </form>
-  <p class="lede">Your name stays in this browser, so the page greets you next time too. Here's hello in a few other languages.</p>
-  <ul>
-    <li>Hola <small>es</small></li>
-    <li>Bonjour <small>fr</small></li>
-    <li>Namaste <small>hi</small></li>
-    <li>Hallo <small>de</small></li>
-    <li>Ciao <small>it</small></li>
-    <li>Konnichiwa <small>ja</small></li>
-    <li>Olá <small>pt</small></li>
-  </ul>
-</main>
+<div class="bloom one" aria-hidden="true"></div>
+<div class="bloom two" aria-hidden="true"></div>
+
+<div class="page">
+  <header>
+    <span class="part" id="part">Good day</span>
+    <time id="clock">--:--</time>
+  </header>
+
+  <main class="hero">
+    <h1>
+      <span class="word" aria-label="Hello"><span style="--i:0" aria-hidden="true">H</span><span style="--i:1" aria-hidden="true">e</span><span style="--i:2" aria-hidden="true">l</span><span style="--i:3" aria-hidden="true">l</span><span style="--i:4" aria-hidden="true">o</span></span><span class="comma">,</span>
+      <span class="field"><label class="sr-only" for="name">Your name</label><input id="name" name="name" type="text" maxlength="24" placeholder="you" autocomplete="given-name" spellcheck="false"><span class="mirror" id="mirror" aria-hidden="true"></span></span><span class="dot">.</span>
+    </h1>
+    <p class="hint"><label for="name">Tap the name to make it yours.</label> It's saved in this browser only, so the page remembers you next time.</p>
+  </main>
+
+  <footer>
+    <h2>Seven other ways to say it</h2>
+    <ul>
+      <li lang="es"><span>Hola</span><small>Spanish</small></li>
+      <li lang="fr"><span>Bonjour</span><small>French</small></li>
+      <li lang="hi"><span>नमस्ते</span><small>Hindi</small></li>
+      <li lang="de"><span>Hallo</span><small>German</small></li>
+      <li lang="it"><span>Ciao</span><small>Italian</small></li>
+      <li lang="ja"><span>こんにちは</span><small>Japanese</small></li>
+      <li lang="pt"><span>Olá</span><small>Portuguese</small></li>
+    </ul>
+  </footer>
+</div>
 
 <script>
   const KEY = "hello-name";
-  const greeting = document.getElementById("greeting");
   const input = document.getElementById("name");
+  const mirror = document.getElementById("mirror");
 
-  function render(name) {
-    greeting.textContent = "";
-    greeting.append("Hello");
-    const clean = name.trim();
-    if (clean) {
-      greeting.append(", ");
-      const span = document.createElement("span");
-      span.className = "name";
-      span.textContent = clean;
-      greeting.append(span);
-    }
-    const dot = document.createElement("span");
-    dot.className = "dot";
-    dot.textContent = clean ? "" : ".";
-    if (clean) greeting.append(".");
-    else greeting.append(dot);
+  function fit() {
+    const v = input.value;
+    mirror.textContent = v || input.placeholder;
+    mirror.classList.toggle("ph", !v);
+    input.style.width = Math.ceil(mirror.getBoundingClientRect().width + 2) + "px";
+    input.classList.toggle("filled", v.trim().length > 0);
   }
 
   let saved = "";
   try { saved = localStorage.getItem(KEY) || ""; } catch (e) {}
   if (!input.value) input.value = saved;
-  render(input.value);
+  fit();
 
   input.addEventListener("input", () => {
-    render(input.value);
+    fit();
     try { localStorage.setItem(KEY, input.value.trim()); } catch (e) {}
   });
-  document.getElementById("name-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    input.blur();
-  });
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") input.blur(); });
+  window.addEventListener("resize", fit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 
+  const partEl = document.getElementById("part");
+  const clockEl = document.getElementById("clock");
   function tick() {
     const now = new Date();
     const h = now.getHours();
-    const part = h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    partEl.textContent = h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    const day = now.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" });
     const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    document.getElementById("when").innerHTML = part + ' · <time id="clock">' + time + "</time>";
+    clockEl.textContent = day + " · " + time;
+    clockEl.dateTime = now.toISOString();
   }
   tick();
   setInterval(tick, 30000);
